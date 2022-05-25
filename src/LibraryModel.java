@@ -8,6 +8,9 @@
 
 import javax.swing.*;
 
+/**
+ * author matt.romanes
+ */
 public class LibraryModel {
 
     // For use in creating dialogs and making them modal
