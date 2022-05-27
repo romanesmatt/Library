@@ -21,9 +21,20 @@ public class LibraryModel {
 
     // For use in creating dialogs and making them modal
     private JFrame dialogParent;
+    private Connection connection = null;
 
-    public LibraryModel(JFrame parent, String userid, String password) {
-	dialogParent = parent;
+    public LibraryModel(JFrame parent, String userId, String password) throws SQLException {
+        this.dialogParent = parent;
+        try{
+            Class.forName("org.postgresql.Driver");
+            String url = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc";
+            connection = DriverManager.getConnection(url, userId, password);
+
+            System.out.println("Connection established.");
+
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public String bookLookup(int isbn) {

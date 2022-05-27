@@ -72,7 +72,7 @@ public class LibraryUI extends JFrame {
      * Create a new LibraryUI object - showing an authentication dialog
      * then bringing up the main window.
      */
-    public LibraryUI() {
+    public LibraryUI() throws SQLException {
 	super("JDBC Library");
 	// Uncomment the following if you'd rather not see everything in bold
 	//UIManager.put("swing.boldMetal", Boolean.FALSE);
@@ -603,7 +603,11 @@ public class LibraryUI extends JFrame {
 	// Build the UI on the Swing thread
 	EventQueue.invokeLater(new Runnable() {
 		public void run() {
-		    new LibraryUI();
+			try {
+				new LibraryUI();
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	    });
     }
