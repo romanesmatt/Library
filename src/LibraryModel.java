@@ -193,7 +193,7 @@ public class LibraryModel {
     }
 
     /**
-     * Searches and returns all authors
+     * Searches and returns all authors.
      * @return
      */
     public String showAllAuthors() {
@@ -215,12 +215,79 @@ public class LibraryModel {
         return authors;
     }
 
+    /**
+     * Searches and returns a given customer.
+     * @param customerID
+     * @return
+     */
     public String showCustomer(int customerID) {
-        return "Show Customer Stub";
+        String cust = "Show Customer: \n" ;
+        String book = "";
+        String borrowed = "";
+
+        try{
+            int customer = 0;
+            Statement statemnt = connection.createStatement();
+            String select = "SELECT * FROM  Customer WHERE (customerId = " + customerID + ");";
+            ResultSet result = statemnt.executeQuery(select);
+
+            while(result.next()){ customer++; }
+            if(customer == 0){ return "No such Customer ID"; }
+
+            try {
+                select = "SELECT * FROM Customer WHERE (customerId = " + customerID + ");";
+                result = statemnt.executeQuery(select);
+
+                while(result.next()){
+                    cust += " 	" + result.getInt("customerid") + ": "+ result.getString("l_name").replaceAll("\\s+","") + ", " + result.getString("f_name").replaceAll("\\s+ ","")
+                            + " - " + result.getString("city") + "\n";
+                }
+
+                select = "SELECT * FROM Cust_book NATURAL JOIN book WHERE (customerId = " + customerID +");";
+                result = statemnt.executeQuery(select);
+
+                while(result.next()){
+                    book += " 	\n " + result.getInt("isbn") + " - " + result.getString("title");
+                    customer++;
+                }
+
+                if(customer == 0){ borrowed = "\n (No books borrowed)"; }
+                else{ borrowed = " 	Books Borrowed: " + customer; }
+
+                statemnt.close();
+
+            } catch (SQLException e) {
+                return "ERROR cannot find books";
+            }
+        } catch (SQLException e) {
+            return "ERROR no such Customer ID";
+        }
+
+        return cust + borrowed + book + " \n";
     }
 
+    /**
+     * Searches and returns all customers.
+     * @return
+     */
     public String showAllCustomers() {
-        return "Show All Customers Stub";
+        String allCustomers = "Show all customers: \n";
+
+        try {
+            String select = "SELECT * FROM customer;";
+            Statement statemnt = connection.createStatement();
+            ResultSet result = statemnt.executeQuery(select);
+
+            while(result.next()){
+                allCustomers += "  	 " + result.getInt("customerid") + ": "+ result.getString("l_name").replaceAll("\\s+","") + ", " + result.getString("f_name").replaceAll("\\s+ ","")
+                        + " - " + result.getString("city") + " \n";
+            }
+
+        } catch (SQLException e) {
+            return "ERROR getting all customers";
+        }
+
+        return allCustomers;
     }
 
     public String borrowBook(int isbn, int customerID,
