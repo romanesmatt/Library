@@ -146,8 +146,6 @@ public class LibraryModel {
         }
 
         return output;
-
-        return output;
     }
 
     public String showAuthor(int authorID) {
