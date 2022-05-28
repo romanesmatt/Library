@@ -192,8 +192,27 @@ public class LibraryModel {
         return "Show Author: \n" + output + title + book + " \n";
     }
 
+    /**
+     * Searches and returns all authors
+     * @return
+     */
     public String showAllAuthors() {
-        return "Show All Authors Stub";
+        String authors = "Showing Authors: \n";
+
+        try {
+            String select = "SELECT * FROM author;";
+            Statement statemnt = connection.createStatement();
+            ResultSet result = statemnt.executeQuery(select);
+
+            while(result.next()){
+                authors += " 	" + result.getInt("AuthorId") + " - " + result.getString("name").replaceAll("\\s+","") + ", " + result.getString("surname") + "\n";
+            }
+
+        } catch (SQLException e) {
+            return "ERROR Showing Authors";
+        }
+
+        return authors;
     }
 
     public String showCustomer(int customerID) {
