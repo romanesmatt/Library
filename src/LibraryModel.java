@@ -139,7 +139,7 @@ public class LibraryModel {
             }
             statemnt.close();
 
-            if(isLoaned == false) return output +  "(No Loaned Books)";
+            if(!isLoaned) return output +  "(No Loaned Books)";
 
         } catch (SQLException e) {
             return "ERROR accessing books.";
