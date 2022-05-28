@@ -115,8 +115,39 @@ public class LibraryModel {
         return showCat + output.toString();
     }
 
+    /**
+     * Shows all loaned books, if there are any.
+     * @return
+     */
     public String showLoanedBooks() {
-        return "Show Loaned Books Stub";
+        String output = "Show Loaned Books: \n 	";
+
+        try {
+            int isbn = 0;
+            //if no books are loaned, the boolean will return false
+            boolean isLoaned = false;
+
+            String query = "SELECT * FROM Book WHERE (numofcop > numLeft) ORDER BY isbn ASC;";
+            Statement statemnt = connection.createStatement();
+            ResultSet result = statemnt.executeQuery(query);
+
+            //the book has been succesfully loaned (if any)
+            while(result.next()){
+                isLoaned= true;
+                isbn = result.getInt("isbn");
+                output += bookLookup(isbn) + "\n \n ";
+            }
+            statemnt.close();
+
+            if(isLoaned == false) return output +  "(No Loaned Books)";
+
+        } catch (SQLException e) {
+            return "ERROR accessing books.";
+        }
+
+        return output;
+
+        return output;
     }
 
     public String showAuthor(int authorID) {
