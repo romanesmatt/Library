@@ -66,15 +66,15 @@ public class LibraryModel {
                     "ORDER BY AuthorSeqNo ASC;";
 
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            ResultSet result = statement.executeQuery(query);
 
             //Searching for the result then adding it to the output.
-            while (resultSet.next()) {
-                edition = resultSet.getString("edition_no");
-                nCopies = resultSet.getString("numofcop");
-                copiesLeft = resultSet.getString("numleft");
-                author = resultSet.getString("surname") + ",";
-                title = resultSet.getString("Title");
+            while (result.next()) {
+                edition = result.getString("edition_no");
+                nCopies = result.getString("numofcop");
+                copiesLeft = result.getString("numleft");
+                author = result.getString("surname") + ",";
+                title = result.getString("Title");
             }
             statement.close();
 
@@ -98,11 +98,11 @@ public class LibraryModel {
 
         try {
             String query = "SELECT isbn FROM Book ORDER BY isbn ASC;";
-            Statement statemnt = connection.createStatement();
-            ResultSet resultSet = statemnt.executeQuery(query);
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(query);
 
-            while(resultSet.next()){
-                int isbn = resultSet.getInt("isbn");
+            while (result.next()) {
+                int isbn = result.getInt("isbn");
 
                 //search the book with its isbn using method bookLookup.
                 output.append("\n \n ").append(bookLookup(isbn));
@@ -117,6 +117,7 @@ public class LibraryModel {
 
     /**
      * Shows all loaned books, if there are any.
+     *
      * @return
      */
     public String showLoanedBooks() {
@@ -128,18 +129,18 @@ public class LibraryModel {
             boolean isLoaned = false;
 
             String query = "SELECT * FROM Book WHERE (numofcop > numLeft) ORDER BY isbn ASC;";
-            Statement statemnt = connection.createStatement();
-            ResultSet result = statemnt.executeQuery(query);
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(query);
 
             //the book has been succesfully loaned (if any)
-            while(result.next()){
-                isLoaned= true;
+            while (result.next()) {
+                isLoaned = true;
                 isbn = result.getInt("isbn");
                 output += bookLookup(isbn) + "\n \n ";
             }
-            statemnt.close();
+            statement.close();
 
-            if(!isLoaned) return output +  "(No Loaned Books)";
+            if (!isLoaned) return output + "(No Loaned Books)";
 
         } catch (SQLException e) {
             return "ERROR accessing books.";
@@ -148,8 +149,47 @@ public class LibraryModel {
         return output;
     }
 
+    /**
+     * Searches for a given author and outputs it.
+     *
+     * @param authorID
+     * @return
+     */
     public String showAuthor(int authorID) {
-        return "Show Author Stub";
+        String title = "";
+        String output = "";
+        String book = "";
+        int ID = 0;
+
+        try {
+            String query = "SELECT * FROM Book NATURAL JOIN Book_Author NATURAL JOIN AUTHOR " +
+                    "WHERE (AuthorId = " + authorID + ")" +
+                    "ORDER BY AuthorSeqNo ASC;";
+
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(query);
+
+            while (result.next()) {
+                //iterates +1 book
+                ID++;
+                output = "	" + authorID + " - " + result.getString("name").replaceAll("\\s+", "") + " " + result.getString("surname").replaceAll("\\s+", "") + "\n";
+                book += "\n	" + result.getInt("isbn") + " - " + result.getString("title");
+            }
+
+            //Book does not exist/have been written.
+            if (ID == 0) {
+                title = "(no books written)";
+            } else {
+                title = "	Book written:";
+            }
+
+            statement.close();
+
+        } catch (SQLException e) {
+            return "No such Author ID: ";
+        }
+
+        return "Show Author: \n" + output + title + book + " \n";
     }
 
     public String showAllAuthors() {
