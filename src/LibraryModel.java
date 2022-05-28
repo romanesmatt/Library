@@ -25,7 +25,7 @@ public class LibraryModel {
 
     public LibraryModel(JFrame parent, String userId, String password) throws SQLException {
         this.dialogParent = parent;
-        try{
+        try {
             Class.forName("org.postgresql.Driver");
 
             String url = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc"; //URL for running project on uni lab machines
@@ -36,7 +36,7 @@ public class LibraryModel {
         } catch (SQLException e) {
             System.out.println("Connection cannot be established.");
             e.printStackTrace();
-        }catch(ClassNotFoundException e){
+        } catch (ClassNotFoundException e) {
             System.out.println("Class not found.");
             e.printStackTrace();
         }
@@ -46,6 +46,7 @@ public class LibraryModel {
      * Prints out the information of a given book by searching its ISBN.
      * Goes through the library of books using a query, and if it finds a match,
      * it will be addd onto the output and then printed.
+     *
      * @param isbn
      * @return
      */
@@ -59,7 +60,7 @@ public class LibraryModel {
         String title = "";
 
 
-        try{
+        try {
             String query = "SELECT * FROM Book NATURAL JOIN Book_Author NATURAL JOIN AUTHOR " +
                     "WHERE (isbn = " + isbn + ")" +
                     "ORDER BY AuthorSeqNo ASC;";
@@ -68,67 +69,93 @@ public class LibraryModel {
             ResultSet resultSet = statement.executeQuery(query);
 
             //Searching for the result then adding it to the output.
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 edition = resultSet.getString("edition_no");
-                nCopies =resultSet.getString("numofcop");
+                nCopies = resultSet.getString("numofcop");
                 copiesLeft = resultSet.getString("numleft");
                 author = resultSet.getString("surname") + ",";
                 title = resultSet.getString("Title");
             }
             statement.close();
 
-        }catch(SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return "Book Lookup: \n 	" + isbn + ": " + title + "\n 	Edition: " + edition +
-                " - Number of copies: " + nCopies + " - Copies Left: " + copiesLeft + "\n 	Authors: " + author.replaceAll("\\s+"," ");
+                " - Number of copies: " + nCopies + " - Copies Left: " + copiesLeft + "\n 	Authors: " + author.replaceAll("\\s+", " ");
     }
 
+    /**
+     * Returns all books looked up in the catalogue.
+     * Uses bookLookup to search books and output them.
+     *
+     * @return
+     */
     public String showCatalogue() {
-	return "Show Catalogue Stub";
+        //        Declaring variables for accessibility throughout method
+        String showCat = "Show catalogue: ";
+        StringBuilder output = new StringBuilder();
+
+        try {
+            String query = "SELECT isbn FROM Book ORDER BY isbn ASC;";
+            Statement statemnt = connection.createStatement();
+            ResultSet resultSet = statemnt.executeQuery(query);
+
+            while(resultSet.next()){
+                int isbn = resultSet.getInt("isbn");
+
+                //search the book with its isbn using method bookLookup.
+                output.append("\n \n ").append(bookLookup(isbn));
+            }
+
+        } catch (SQLException e) {
+            return "ERROR accessing catalogue.";
+        }
+
+        return showCat + output.toString();
     }
 
     public String showLoanedBooks() {
-	return "Show Loaned Books Stub";
+        return "Show Loaned Books Stub";
     }
 
     public String showAuthor(int authorID) {
-	return "Show Author Stub";
+        return "Show Author Stub";
     }
 
     public String showAllAuthors() {
-	return "Show All Authors Stub";
+        return "Show All Authors Stub";
     }
 
     public String showCustomer(int customerID) {
-	return "Show Customer Stub";
+        return "Show Customer Stub";
     }
 
     public String showAllCustomers() {
-	return "Show All Customers Stub";
+        return "Show All Customers Stub";
     }
 
     public String borrowBook(int isbn, int customerID,
-			     int day, int month, int year) {
-	return "Borrow Book Stub";
+                             int day, int month, int year) {
+        return "Borrow Book Stub";
     }
 
     public String returnBook(int isbn, int customerid) {
-	return "Return Book Stub";
+        return "Return Book Stub";
     }
 
     public void closeDBConnection() {
     }
 
     public String deleteCus(int customerID) {
-    	return "Delete Customer";
+        return "Delete Customer";
     }
 
     public String deleteAuthor(int authorID) {
-    	return "Delete Author";
+        return "Delete Author";
     }
 
     public String deleteBook(int isbn) {
-    	return "Delete Book";
+        return "Delete Book";
     }
 }
