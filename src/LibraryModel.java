@@ -453,10 +453,34 @@ public class LibraryModel {
     }
 
     public String deleteAuthor(int authorID) {
-        return "Delete Author";
+        String deleteAuthor = "Delete Author: \n \n";
+        String message = "";
+
+        try {
+            Statement statementOne = connection.createStatement();
+            String select1 = "SELECT * FROM author WHERE (authorid = " + authorID + ");";
+            ResultSet result1 = statementOne.executeQuery(select1);
+
+            if(!result1.next()) {
+                message  = " 	The author does not exist within this library.";
+            }
+
+            else {
+                Statement statementTwo = connection.createStatement();
+                String select2 = "DELETE FROM author WHERE (authorid = " + authorID + ");";
+                int result2 = statementTwo.executeUpdate(select2);
+
+                message = " 	The Author has been removed from this library.";
+            }
+        }
+        catch (SQLException sqlex){
+            sqlex.printStackTrace();
+        }
+
+        return deleteAuthor + message;
     }
 
     public String deleteBook(int isbn) {
-        return "Delete Book";
+        return "Delete Book: \n \n";
     }
 }
