@@ -27,9 +27,13 @@ public class LibraryModel {
         this.dialogParent = parent;
         try {
             Class.forName("org.postgresql.Driver");
-
-            String url = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc"; //URL for running project on uni lab machines
-            connection = DriverManager.getConnection(url, userId, password);
+//            URL for running project on uni lab machines
+            String urlUni = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc";
+//            URL for running the project locally
+            String urlLocal = "jdbc:postgresql://matt.romanes@localhost:5432/matt.romanes";
+            String userLocal = "matt.romanes";
+            String passwordLocal = "romanematt";
+            connection = DriverManager.getConnection(urlLocal, userLocal, passwordLocal);
 
             System.out.println("Connection established.");
 
@@ -192,6 +196,7 @@ public class LibraryModel {
 
     /**
      * Searches and returns all authors.
+     *
      * @return
      */
     public String showAllAuthors() {
@@ -202,8 +207,8 @@ public class LibraryModel {
             Statement statement = connection.createStatement();
             ResultSet result = statement.executeQuery(select);
 
-            while(result.next()){
-                authors += " 	" + result.getInt("AuthorId") + " - " + result.getString("name").replaceAll("\\s+","") + ", " + result.getString("surname") + "\n";
+            while (result.next()) {
+                authors += " 	" + result.getInt("AuthorId") + " - " + result.getString("name").replaceAll("\\s+", "") + ", " + result.getString("surname") + "\n";
             }
 
         } catch (SQLException e) {
@@ -215,42 +220,50 @@ public class LibraryModel {
 
     /**
      * Searches and returns a given customer.
+     *
      * @param customerID
      * @return
      */
     public String showCustomer(int customerID) {
-        String cust = "Show Customer: \n" ;
+        String cust = "Show Customer: \n";
         String book = "";
         String borrowed = "";
 
-        try{
+        try {
             int customer = 0;
             Statement statement = connection.createStatement();
             String select = "SELECT * FROM  Customer WHERE (customerId = " + customerID + ");";
             ResultSet result = statement.executeQuery(select);
 
-            while(result.next()){ customer++; }
-            if(customer == 0){ return "No such Customer ID"; }
+            while (result.next()) {
+                customer++;
+            }
+            if (customer == 0) {
+                return "No such Customer ID";
+            }
 
             try {
                 select = "SELECT * FROM Customer WHERE (customerId = " + customerID + ");";
                 result = statement.executeQuery(select);
 
-                while(result.next()){
-                    cust += " 	" + result.getInt("customerid") + ": "+ result.getString("l_name").replaceAll("\\s+","") + ", " + result.getString("f_name").replaceAll("\\s+ ","")
+                while (result.next()) {
+                    cust += " 	" + result.getInt("customerid") + ": " + result.getString("l_name").replaceAll("\\s+", "") + ", " + result.getString("f_name").replaceAll("\\s+ ", "")
                             + " - " + result.getString("city") + "\n";
                 }
 
-                select = "SELECT * FROM Cust_book NATURAL JOIN book WHERE (customerId = " + customerID +");";
+                select = "SELECT * FROM Cust_book NATURAL JOIN book WHERE (customerId = " + customerID + ");";
                 result = statement.executeQuery(select);
 
-                while(result.next()){
+                while (result.next()) {
                     book += " 	\n " + result.getInt("isbn") + " - " + result.getString("title");
                     customer++;
                 }
 
-                if(customer == 0){ borrowed = "\n (No books borrowed)"; }
-                else{ borrowed = " 	Books Borrowed: " + customer; }
+                if (customer == 0) {
+                    borrowed = "\n (No books borrowed)";
+                } else {
+                    borrowed = " 	Books Borrowed: " + customer;
+                }
 
                 statement.close();
 
@@ -268,6 +281,7 @@ public class LibraryModel {
 
     /**
      * Searches and returns all customers.
+     *
      * @return
      */
     public String showAllCustomers() {
@@ -278,8 +292,8 @@ public class LibraryModel {
             Statement statement = connection.createStatement();
             ResultSet result = statement.executeQuery(select);
 
-            while(result.next()){
-                allCustomers += "  	 " + result.getInt("customerid") + ": "+ result.getString("l_name").replaceAll("\\s+","") + ", " + result.getString("f_name").replaceAll("\\s+ ","")
+            while (result.next()) {
+                allCustomers += "  	 " + result.getInt("customerid") + ": " + result.getString("l_name").replaceAll("\\s+", "") + ", " + result.getString("f_name").replaceAll("\\s+ ", "")
                         + " - " + result.getString("city") + " \n";
             }
 
@@ -293,6 +307,7 @@ public class LibraryModel {
 
     /**
      * Allows the customer to borrow a book
+     *
      * @param isbn
      * @param customerID
      * @param day
@@ -312,32 +327,30 @@ public class LibraryModel {
             Statement statement3 = connection.createStatement();
 
             String select1 = "SELECT numLeft FROM book WHERE (isbn = " + isbn + ") AND (numLeft > 0);";
-            ResultSet result1  = statement1.executeQuery(select1);
+            ResultSet result1 = statement1.executeQuery(select1);
 
-            if(result1.next()) {
+            if (result1.next()) {
                 String select2 = "SELECT customerid FROM cust_book WHERE (isbn = " + isbn + ") AND (customerid = " + customerID + ");";
-                ResultSet result2  = statement2.executeQuery(select2);
+                ResultSet result2 = statement2.executeQuery(select2);
 
                 //checks if the result from the query of the isbn entered
-                if(result2.next())
+                if (result2.next())
                     message = " 	Customer already borrowed this book: " + isbn;
                 else {
                     message = " 	Borrow book successful.";
                     updateBook(isbn, customerID, day, month, year);
                 }
-            }
-            else message = " 	There are no copies left of this book: " + isbn;
+            } else message = " 	There are no copies left of this book: " + isbn;
 
             String select3 = "SELECT customerid FROM cust_book WHERE (isbn = " + isbn + ") AND (customerid = " + customerID + ");";
-            ResultSet result3  = statement3.executeQuery(select3);
+            ResultSet result3 = statement3.executeQuery(select3);
             result3 = statement3.executeQuery("SELECT * FROM cust_book WHERE (customerid = " + customerID + ");");
 
             while (result3.next()) {
                 finalResult += "\n " + result3.getInt("isbn") + " - " + result3.getString("title") + "\nLoaned to: " + result3.getInt("customerid") + ": " +
-                        result3.getString("l_name").replaceAll("\\s+","") + ", " + result3.getString("f_name").replaceAll("\\s+ ","") + "\nDue Date: " + result3.getDate(2);
+                        result3.getString("l_name").replaceAll("\\s+", "") + ", " + result3.getString("f_name").replaceAll("\\s+ ", "") + "\nDue Date: " + result3.getDate(2);
             }
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("ERROR borrowing book");
             e.printStackTrace();
         }
@@ -348,6 +361,7 @@ public class LibraryModel {
     /**
      * Helper method for the updateBook method.
      * Updates the values from the queries and returns it.
+     *
      * @param isbn, customerID, day, month, year
      */
     public void updateBook(int isbn, int customerID, int day, int month, int year) {
@@ -362,14 +376,14 @@ public class LibraryModel {
             int resultOne = statement.executeUpdate(select1);
             int resultTwo = statementTwo.executeUpdate(select2);
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     /**
      * Gives the customer the opportunity to return a given book.
+     *
      * @param isbn
      * @param customerid
      * @return
@@ -384,8 +398,8 @@ public class LibraryModel {
             String select1 = "SELECT * FROM customer WHERE (customerid = " + customerid + ");";
             result = statement.executeQuery(select1);
 
-            if(result.next()) {
-                if(result.next()) output = " 	isbn does not exist.";
+            if (result.next()) {
+                if (result.next()) output = " 	isbn does not exist.";
 
                 else {
                     String select2 = "SELECT * FROM book WHERE (isbn = " + isbn + ");";
@@ -397,20 +411,18 @@ public class LibraryModel {
                     String select4 = "UPDATE book SET numleft = numleft+1 WHERE (isbn = " + isbn + ");";
                     statement.executeUpdate(select4);
                 }
-            }
-            else output = " 	No more remaining copies of the book.";
+            } else output = " 	No more remaining copies of the book.";
 
             String select5 = "SELECT * FROM cust_book WHERE (customerid = " + customerid + ");";
             result = statement.executeQuery(select5);
 
             connection.commit();
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println("ERROR occured");
             e.printStackTrace();
         }
 
-        return returnBook + output + " \n" + " 	Book has been returned." ;
+        return returnBook + output + " \n" + " 	Book has been returned.";
     }
 
     /**
@@ -419,8 +431,7 @@ public class LibraryModel {
     public void closeDBConnection() {
         try {
             connection.close();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.out.println("Connection cannot be closed.");
         }
     }
@@ -434,19 +445,16 @@ public class LibraryModel {
             String select1 = "SELECT * FROM cust_book WHERE (customerid = " + customerID + ");";
             ResultSet result = statement.executeQuery(select1);
 
-            if(result.next()) {
-                message  = " 	The customer does not exist within this library.";
-            }
-
-            else {
+            if (result.next()) {
+                message = " 	The customer does not exist within this library.";
+            } else {
                 Statement statemnt2 = connection.createStatement();
                 String select2 = "DELETE  FROM customer WHERE (customerid = " + customerID + ");";
                 int result2 = statemnt2.executeUpdate(select2);
 
                 message = " 	The Customer has been removed from the database.";
             }
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return deleteCustomer + message;
@@ -461,19 +469,16 @@ public class LibraryModel {
             String select1 = "SELECT * FROM author WHERE (authorid = " + authorID + ");";
             ResultSet result1 = statementOne.executeQuery(select1);
 
-            if(!result1.next()) {
-                message  = " 	The author does not exist within this library.";
-            }
-
-            else {
+            if (!result1.next()) {
+                message = " 	The author does not exist within this library.";
+            } else {
                 Statement statementTwo = connection.createStatement();
                 String select2 = "DELETE FROM author WHERE (authorid = " + authorID + ");";
                 int result2 = statementTwo.executeUpdate(select2);
 
                 message = " 	The Author has been removed from this library.";
             }
-        }
-        catch (SQLException sqlex){
+        } catch (SQLException sqlex) {
             sqlex.printStackTrace();
         }
 
