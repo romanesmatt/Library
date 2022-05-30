@@ -29,8 +29,9 @@ public class LibraryModel {
             Class.forName("org.postgresql.Driver");
 //            URL for running project on uni lab machines
             String urlUni = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc";
-//            URL for running the project locally
-            String urlLocal = "jdbc:postgresql://matt.romanes@localhost:5432/matt.romanes";
+
+//            URL for running the project locally, as well as username and password
+            String urlLocal = "jdbc:postgresql://localhost:5432/matt.romanes";
             String userLocal = "matt.romanes";
             String passwordLocal = "romanematt";
             connection = DriverManager.getConnection(urlLocal, userLocal, passwordLocal);
