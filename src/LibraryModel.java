@@ -59,7 +59,8 @@ public class LibraryModel {
         String edition = "";
         String nCopies = "";
         String copiesLeft = "";
-        String author = "";
+        String authorSurname = "";
+        String authorFirstName = "";
         String title = "";
 
 
@@ -76,7 +77,8 @@ public class LibraryModel {
                 edition = result.getString("edition_no");
                 nCopies = result.getString("numofcop");
                 copiesLeft = result.getString("numleft");
-                author = result.getString("surname") + ",";
+                authorFirstName = result.getString("name");
+                authorSurname = result.getString("surname");
                 title = result.getString("Title");
             }
             statement.close();
@@ -85,7 +87,7 @@ public class LibraryModel {
             e.printStackTrace();
         }
         return "Book Lookup: \n 	" + isbn + ": " + title + "\n 	Edition: " + edition +
-                " - Number of copies: " + nCopies + " - Copies Left: " + copiesLeft + "\n 	Authors: " + author.replaceAll("\\s+", " ");
+                " - Number of copies: " + nCopies + " - Copies Left: " + copiesLeft + "\n 	Author(s): " + authorSurname.replaceAll("\\s+", " ") + ", " + authorFirstName.replaceAll("\\s+", " ");
     }
 
     /**
