@@ -178,8 +178,14 @@ public class LibraryModel {
             while (result.next()) {
                 //iterates +1 book
                 ID++;
-                output = "	" + authorID + " - " + result.getString("name").replaceAll("\\s+", "") + " " + result.getString("surname").replaceAll("\\s+", "") + "\n";
-                book.append("\n	").append(result.getInt("isbn")).append(" - ").append(result.getString("title"));
+                output = "	" + authorID + " - " + result.getString("name").
+                        replaceAll("\\s+", "") + " " + result.getString("surname").
+                        replaceAll("\\s+", "") + "\n";
+
+                book.append("\n	").
+                        append(result.getInt("isbn")).
+                        append(" - ").
+                        append(result.getString("title"));
             }
 
             //Book does not exist/have been written.
@@ -212,7 +218,14 @@ public class LibraryModel {
             ResultSet result = statement.executeQuery(select);
 
             while (result.next()) {
-                allAuthors.append(" 	").append(result.getInt("AuthorId")).append(" - ").append(result.getString("name").replaceAll("\\s+", "")).append(", ").append(result.getString("surname")).append("\n");
+                allAuthors.append(" 	").
+                        append(result.getInt("authorid")).
+                        append(" - ").
+                        append(result.getString("name").
+                                replaceAll("\\s+", "")).
+                        append(", ").
+                        append(result.getString("surname")).
+                        append("\n");
             }
 
         } catch (SQLException e) {
@@ -243,7 +256,7 @@ public class LibraryModel {
                 customer++;
             }
             if (customer == 0) {
-                return "No such Customer ID";
+                return "No customer with that ID in the database.";
             }
 
             try {
@@ -258,7 +271,10 @@ public class LibraryModel {
                 result = statement.executeQuery(select);
 
                 while (result.next()) {
-                    book.append(" 	\n ").append(result.getInt("isbn")).append(" - ").append(result.getString("title"));
+                    book.append(" 	\n ").
+                            append(result.getInt("isbn")).
+                            append(" - ").
+                            append(result.getString("title"));
                     customer++;
                 }
 
@@ -296,7 +312,16 @@ public class LibraryModel {
             ResultSet result = statement.executeQuery(select);
 
             while (result.next()) {
-                allCustomers.append("").append(result.getInt("customerid")).append(": ").append(result.getString("l_name").replaceAll("\\s+", "")).append(", ").append(result.getString("f_name").replaceAll("\\s+ ", "")).append(" - ").append(result.getString("city")).append(" \n");
+                allCustomers.append(result.getInt("customerid")).
+                        append(": ").
+                        append(result.getString("l_name").
+                                replaceAll("\\s+", "")).
+                        append(", ").
+                        append(result.getString("f_name").
+                                replaceAll("\\s+ ", ""))
+                        .append(" - ").
+                        append(result.getString("city")).
+                        append(" \n");
             }
 
         } catch (SQLException e) {
@@ -348,8 +373,18 @@ public class LibraryModel {
             ResultSet resultThree = statementThree.executeQuery(selectThree);
             resultThree = statementThree.executeQuery("SELECT * FROM cust_book WHERE (customerid = " + customerID + ");");
 
-            while ( resultThree.next()) {
-                finalResult.append("\n ").append(resultThree.getInt("isbn")).append(" - ").append(resultThree.getString("title")).append("\nLoaned to: ").append(resultThree.getInt("customerid")).append(": ").append(resultThree.getString("l_name").replaceAll("\\s+", "")).append(", ").append(resultThree.getString("f_name").replaceAll("\\s+ ", "")).append("\nDue Date: ").append(resultThree.getDate(2));
+            while (resultThree.next()) {
+                finalResult.append("\n ").append(resultThree.getInt("isbn")).
+                        append(" - ").append(resultThree.getString("title")).
+                        append("\nLoaned to: ").append(resultThree.getInt("customerid")).
+                        append(": ").
+                        append(resultThree.getString("l_name").
+                                replaceAll("\\s+", "")).
+                        append(", ").
+                        append(resultThree.getString("f_name").
+                                replaceAll("\\s+ ", "")).
+                        append("\nDue Date: ").append(resultThree.
+                                getDate(2));
             }
         } catch (SQLException e) {
             System.out.println("ERROR borrowing book");
@@ -377,6 +412,8 @@ public class LibraryModel {
             int resultOne = statementOne.executeUpdate(selectOne);
             int resultTwo = statementTwo.executeUpdate(selectTwo);
 
+            System.out.println("Book updated.");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -400,7 +437,7 @@ public class LibraryModel {
             result = statement.executeQuery(selectOne);
 
             if (result.next()) {
-                if (result.next()) output = " 	isbn does not exist.";
+                if (result.next()) output = "ISBN does not exist.";
 
                 else {
                     String selectTwo = "SELECT * FROM book WHERE (isbn = " + isbn + ");";
@@ -412,7 +449,7 @@ public class LibraryModel {
                     String selectFour = "UPDATE book SET numleft = numleft+1 WHERE (isbn = " + isbn + ");";
                     statement.executeUpdate(selectFour);
                 }
-            } else output = " 	No more remaining copies of the book.";
+            } else output = "No more remaining copies of the book.";
 
             String selectFive = "SELECT * FROM cust_book WHERE (customerid = " + customerid + ");";
             result = statement.executeQuery(selectFive);
