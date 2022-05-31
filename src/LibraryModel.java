@@ -35,6 +35,7 @@ public class LibraryModel {
             String userLocal = "matt.romanes";
             String passwordLocal = "romanematt";
             connection = DriverManager.getConnection(urlLocal, userLocal, passwordLocal);
+            connection.setAutoCommit(false);
 
             System.out.println("Connection established.");
 
@@ -185,7 +186,7 @@ public class LibraryModel {
             if (ID == 0) {
                 title = "(no books written)";
             } else {
-                title = "	Book written:";
+                title = "Book written:";
             }
 
             statement.close();
@@ -445,8 +446,8 @@ public class LibraryModel {
             String selectOne = "SELECT * FROM cust_book WHERE (customerid = " + customerID + ");";
             ResultSet result = statement.executeQuery(selectOne);
 
-            if (result.next()) {
-                message = " The customer does not exist within this library.";
+            if (!result.next()) {
+                message = " The Customer does not exist within this library.";
             } else {
                 Statement statementTwo = connection.createStatement();
                 String selectTwo = "DELETE  FROM customer WHERE (customerid = " + customerID + ");";
@@ -470,16 +471,16 @@ public class LibraryModel {
             ResultSet resultOne = statementOne.executeQuery(selectOne);
 
             if (!resultOne.next()) {
-                message = "The author does not exist within this library.";
+                message = "The Author does not exist within this library.";
             } else {
                 Statement statementTwo = connection.createStatement();
                 String selectTwo = "DELETE FROM author WHERE (authorid = " + authorID + ");";
                 int resultTwo = statementTwo.executeUpdate(selectTwo);
 
-                message = "The Author has been removed from this library.";
+                message = "The Author has been removed from the database.";
             }
-        } catch (SQLException sqlex) {
-            sqlex.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return deleteAuthor + message;
