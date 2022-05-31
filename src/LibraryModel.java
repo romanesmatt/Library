@@ -86,8 +86,8 @@ public class LibraryModel {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return "Book Lookup: \n 	" + isbn + ": " + title + "\n 	Edition: " + edition +
-                " - Number of copies: " + nCopies + " - Copies Left: " + copiesLeft + "\n 	Author(s): " + authorSurname.replaceAll("\\s+", " ") + ", " + authorFirstName.replaceAll("\\s+", " ");
+        return "Book Lookup: \n     " + isbn + ": " + title + "\n   Edition: " + edition +
+                " \n    Number of copies: " + nCopies + " \n    Copies left: " + copiesLeft + "\n 	Authors: " + authorSurname.replaceAll("\\s+", " ") + ", " + authorFirstName.replaceAll("\\s+", " ");
     }
 
     /**
@@ -479,7 +479,7 @@ public class LibraryModel {
                 String select2 = "DELETE FROM author WHERE (authorid = " + authorID + ");";
                 int result2 = statementTwo.executeUpdate(select2);
 
-                message = " 	The Author has been removed from this library.";
+                message = "The Author has been removed from this library.";
             }
         } catch (SQLException sqlex) {
             sqlex.printStackTrace();
