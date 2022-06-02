@@ -402,11 +402,11 @@ public class LibraryModel {
      */
     public void updateBook(int isbn, int customerID, int day, int month, int year) {
         try {
-            LocalDate date = LocalDate.of(year, month, day);
+            LocalDate dueDate = LocalDate.of(year, month, day);
 
             Statement statementOne = connection.createStatement();
             Statement statementTwo = connection.createStatement();
-            String selectOne = "INSERT INTO cust_book VALUES('" + isbn + "','" + date + "','" + customerID + "');";
+            String selectOne = "INSERT INTO cust_book VALUES('" + isbn + "','" + dueDate + "','" + customerID + "');";
             String selectTwo = "UPDATE book SET numleft = numleft-1 WHERE (isbn = " + isbn + ");";
 
             int resultOne = statementOne.executeUpdate(selectOne);
