@@ -26,15 +26,17 @@ public class LibraryModel {
     public LibraryModel(JFrame parent, String userId, String password) throws SQLException {
         this.dialogParent = parent;
         try {
-            Class.forName("org.postgresql.Driver");
+            Class.forName("org.postgresql.Drsiver");
 //            URL for running project on uni lab machines
             String urlUni = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc";
+           String userUni = "romanematt";
+           String passwordUni = "romanematt2463";
 
 //            URL for running the project locally, as well as username and password
             String urlLocal = "jdbc:postgresql://localhost:5432/matt.romanes";
             String userLocal = "matt.romanes";
             String passwordLocal = "romanematt";
-            connection = DriverManager.getConnection(urlLocal, userLocal, passwordLocal);
+            connection = DriverManager.getConnection(urlLocal, userId, password);
             connection.setAutoCommit(false);
 
             System.out.println("Connection established.");
