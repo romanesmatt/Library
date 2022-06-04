@@ -26,7 +26,7 @@ public class LibraryModel {
     public LibraryModel(JFrame parent, String userId, String password) throws SQLException {
         this.dialogParent = parent;
         try {
-            Class.forName("org.postgresql.Drsiver");
+            Class.forName("org.postgresql.Driver");
 //            URL for running project on uni lab machines
             String urlUni = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc";
            String userUni = "romanematt";
