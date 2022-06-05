@@ -278,10 +278,10 @@ public class LibraryModel {
                 s = connection.createStatement();
                 s.execute("BEGIN");
                 s.execute("LOCK Customer IN ROW SHARE MODE;");
-                ResultSet rsbook = s.executeQuery("SELECT * FROM book WHERE isbn=" + isbn);
-                if (rsbook.next()) {
-                    String bookleft = rsbook.getString("numLeft");
-                    if (Integer.parseInt(bookleft) > 0) {
+                ResultSet rsBook = s.executeQuery("SELECT * FROM book WHERE isbn=" + isbn);
+                if (rsBook.next()) {
+                    String bookLeft = rsBook.getString("numLeft");
+                    if (Integer.parseInt(bookLeft) > 0) {
                         s.execute("LOCK book IN ROW SHARE MODE;");
 
                         JFrame f = new JFrame();
@@ -327,10 +327,10 @@ public class LibraryModel {
         String result = "";
         try {
             s = connection.createStatement();
-            // check if customer exist
+            // check if the customer exists
             ResultSet rsCustomer = s.executeQuery("SELECT * FROM Customer WHERE customerid=" + customerid);
             s = connection.createStatement();
-            // check if customer exist
+            // check if the customer exists
 
             if (rsCustomer.next()) {
                 s = connection.createStatement();
@@ -385,11 +385,11 @@ public class LibraryModel {
         String result = "";
         try {
             s = connection.createStatement();
-            // check if customer exist
+            // check if the customer exists
             ResultSet rsCustomer = s.executeQuery("SELECT * FROM Customer WHERE customerid=" + customerID);
             if (rsCustomer.next()) {
-                ResultSet rsCustCustomer = s.executeQuery("SELECT * FROM cust_book WHERE customerid=" + customerID);
-                if (rsCustCustomer.next()) {
+                ResultSet rsCustomerTwo = s.executeQuery("SELECT * FROM cust_book WHERE customerid=" + customerID);
+                if (rsCustomerTwo.next()) {
                     s = connection.createStatement();
                     s.execute("BEGIN");
                     result = "The customer with customer ID(" + customerID
@@ -443,14 +443,14 @@ public class LibraryModel {
             // check if customer exist
             ResultSet rsBook = s.executeQuery("SELECT * FROM book WHERE isbn=" + isbn);
             if (rsBook.next()) {
-                ResultSet rsCustBook = s.executeQuery("SELECT * FROM cust_book WHERE isbn=" + isbn);
-                if (rsCustBook.next()) {
+                ResultSet rsCustomerBook = s.executeQuery("SELECT * FROM cust_book WHERE isbn=" + isbn);
+                if (rsCustomerBook.next()) {
                     s = connection.createStatement();
                     s.execute("BEGIN");
                     result = "The book with ISBN(" + isbn
                             + ") still has loaned copies. \n Therefore, it cannot be deleted.";
                 } else {
-                    ResultSet rsauBook = s.executeQuery("SELECT * FROM Book_Author WHERE isbn=" + isbn);
+                    ResultSet rsAuthorBook = s.executeQuery("SELECT * FROM Book_Author WHERE isbn=" + isbn);
                     s.executeUpdate("DELETE FROM Book_Author WHERE isbn = " + isbn);
                     s.executeUpdate("DELETE FROM book WHERE isbn = " + isbn);
 
