@@ -1,7 +1,7 @@
 /*
  * LibraryModel.java
  * Author: Matt Romanes (300492211)
- * Created on:
+ * Created on: (Began) on 28/5/2022
  */
 
 import java.sql.Connection;
@@ -284,6 +284,7 @@ public class LibraryModel {
                     if (Integer.parseInt(bookLeft) > 0) {
                         s.execute("LOCK book IN ROW SHARE MODE;");
 
+                        //Additional dialog to lock in user's choice
                         JFrame f = new JFrame();
                         int a = JOptionPane.showConfirmDialog(f, "Are you sure that you want to borrow this book?");
                         if (a == JOptionPane.YES_OPTION) {
@@ -342,6 +343,8 @@ public class LibraryModel {
                     if (Integer.parseInt(bookLeft) > 0) {
                         s.execute("LOCK book IN ROW SHARE MODE;");
 
+
+                        //Additional dialog to lock in user's choice
                         JFrame f = new JFrame();
                         int a = JOptionPane.showConfirmDialog(f, "Are you sure that you want to return this book?");
                         if (a == JOptionPane.YES_OPTION) {
@@ -380,6 +383,12 @@ public class LibraryModel {
         }
     }
 
+    /**
+     * Searches for and then deletes a customer based on
+     * the given customer ID.
+     * @param customerID
+     * @return
+     */
     public String deleteCus(int customerID) {
         Statement s = null;
         String result = "";
@@ -411,12 +420,18 @@ public class LibraryModel {
         return result;
     }
 
+    /**
+     * Searches for and then deletes an author based
+     * on the given author ID.
+     * @param authorID
+     * @return
+     */
     public String deleteAuthor(int authorID) {
         Statement s = null;
         String result = "";
         try {
             s = connection.createStatement();
-            // check if customer exist
+            // check if the customer exists
             ResultSet rsAuthor = s.executeQuery("SELECT * FROM Author WHERE authorid=" + authorID);
             if (rsAuthor.next()) {
                 s.executeUpdate("DELETE FROM Book_Author WHERE authorid = " + authorID);
@@ -435,12 +450,18 @@ public class LibraryModel {
         return result;
     }
 
+    /**
+     * Searches for and then deletes a book
+     * based on the given ISBN.
+     * @param isbn
+     * @return
+     */
     public String deleteBook(int isbn) {
         Statement s = null;
         String result = "";
         try {
             s = connection.createStatement();
-            // check if customer exist
+            // check if the customer exists
             ResultSet rsBook = s.executeQuery("SELECT * FROM book WHERE isbn=" + isbn);
             if (rsBook.next()) {
                 ResultSet rsCustomerBook = s.executeQuery("SELECT * FROM cust_book WHERE isbn=" + isbn);
