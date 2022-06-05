@@ -69,11 +69,11 @@ public class LibraryModel {
                 String edition = "\n Edition No.: " + rs.getString("edition_no");
                 String noOfCopies = "\n Number of Copies: " + rs.getString("numofcop");
                 String numLeft = "\n Number left: " + rs.getString("numleft");
-                String Author = "\n Author: " + rs.getString("name");
+                String author = "\n Author: " + rs.getString("name");
                 if (result.toString().equals("")) {
-                    result.append("\n \n isbn: ").append(isbn).append(title).append(edition).append(noOfCopies).append(numLeft).append(Author);
+                    result.append("\n \n ISBN: ").append(isbn).append(title).append(edition).append(noOfCopies).append(numLeft).append(author);
                 } else {
-                    result.append(Author);
+                    result.append(author);
                 }
             }
             if (!bookExists) {
@@ -94,7 +94,7 @@ public class LibraryModel {
     public String showCatalogue() {
         Statement s = null;
         ResultSet rs = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         try {
             s = connection.createStatement();
             rs = s.executeQuery("SELECT * FROM book ORDER BY isbn ASC");
@@ -104,7 +104,7 @@ public class LibraryModel {
                 String edition = "\n Edition No.: " + rs.getString("edition_no");
                 String noOfCopies = "\n Number of Copies: " + rs.getString("numofcop");
                 String numLeft = "\n Number left: " + rs.getString("numleft");
-                result += "\n \n" + isbn + title + edition + noOfCopies + numLeft;
+                result.append("\n \n").append(isbn).append(title).append(edition).append(noOfCopies).append(numLeft);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -293,6 +293,7 @@ public class LibraryModel {
                                     + "');");
                             s.executeUpdate("UPDATE book SET numleft = numleft-1 WHERE isbn =" + isbn + " ;");
                             s.execute("commit;");
+
                             result = "Book has been borrowed ";
                         }
 
@@ -311,8 +312,6 @@ public class LibraryModel {
             e.printStackTrace();
         }
         return result;
-
-
 
     }
 
