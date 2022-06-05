@@ -192,7 +192,7 @@ public class LibraryModel {
                 String authorFirstName = "\n Author first name: " + rs.getString("name");
                 String authorSurname = "\n Author surname: " + rs.getString("surname");
                 String authorId = "\n Author ID: " + rs.getString("authorid");
-                result.append(authorId).append(authorFirstName).append(authorSurname);
+                result.append(authorId).append(authorFirstName).append(authorSurname).append("\n");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -245,12 +245,12 @@ public class LibraryModel {
                 String customerName = "\n Customer Name: " + rs.getString("F_Name") + rs.getString("L_Name");
                 String city = "\n City: " + rs.getString("city");
                 String customerId = "\n Customer ID: " + rs.getString("customerId");
-                result.append("\n \n").append(customerId).append(customerName).append(city);
+                result.append(customerId).append(customerName).append(city).append("\n");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result.toString();
+        return "Showing all customers: \n" + result.toString();
     }
 
     /**
