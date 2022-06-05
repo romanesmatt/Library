@@ -57,7 +57,7 @@ public class LibraryModel {
     public String bookLookup(int isbn) {
         Statement s = null;
         ResultSet rs = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         boolean bookExists = false;
         try {
             s = connection.createStatement();
@@ -70,19 +70,19 @@ public class LibraryModel {
                 String noOfCopies = "\n Number of Copies: " + rs.getString("numofcop");
                 String numLeft = "\n Number left: " + rs.getString("numleft");
                 String Author = "\n Author: " + rs.getString("name");
-                if (result.equals("")) {
-                    result += "\n \n isbn: " + isbn + title + edition + noOfCopies + numLeft + Author;
+                if (result.toString().equals("")) {
+                    result.append("\n \n isbn: ").append(isbn).append(title).append(edition).append(noOfCopies).append(numLeft).append(Author);
                 } else {
-                    result += Author;
+                    result.append(Author);
                 }
             }
             if (!bookExists) {
-                result = "There are no records of this book in the database";
+                result = new StringBuilder("There are no records of this book in the database");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -121,7 +121,7 @@ public class LibraryModel {
     public String showLoanedBooks() {
         Statement s = null;
         ResultSet rs = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         String loanedBooks = "";
         boolean loaned = false;
         try {
@@ -135,7 +135,7 @@ public class LibraryModel {
                 String edition = "\n Edition No.: " + rs.getString("edition_no");
                 String noOfCopies = "\n Number of Copies: " + rs.getString("numofcop");
                 String numLeft = "\n Number left: " + rs.getString("numleft");
-                result += "\n \n " + isbn + title + edition + noOfCopies + numLeft;
+                result.append("\n \n ").append(isbn).append(title).append(edition).append(noOfCopies).append(numLeft);
             }
             if (!loaned) {
                 loanedBooks = "There are currently no loaned books.";
@@ -156,7 +156,7 @@ public class LibraryModel {
     public String showAuthor(int authorID) {
         Statement s = null;
         ResultSet rs = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         boolean authorExists = false;
         try {
             s = connection.createStatement();
@@ -165,15 +165,15 @@ public class LibraryModel {
                 authorExists = true;
                 String authorFirstName = "\n Author's first name: " + rs.getString("name");
                 String authorSurname = "\n Author's surname: " + rs.getString("surname");
-                result += "\n \n Author ID: " + authorID + authorFirstName + authorSurname;
+                result.append("\n \n Author ID: ").append(authorID).append(authorFirstName).append(authorSurname);
             }
             if (!authorExists) {
-                result = "There are no records of this author in the database";
+                result = new StringBuilder("There are no records of this author in the database");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -184,7 +184,7 @@ public class LibraryModel {
     public String showAllAuthors() {
         Statement s = null;
         ResultSet rs = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         try {
             s = connection.createStatement();
             rs = s.executeQuery("SELECT * FROM Author");
@@ -192,7 +192,7 @@ public class LibraryModel {
                 String authorFirstName = "\n Author first name: " + rs.getString("name");
                 String authorSurname = "\n Author surname: " + rs.getString("surname");
                 String authorId = "\n Author ID: " + rs.getString("authorid");
-                result += authorId + authorFirstName + authorSurname;
+                result.append(authorId).append(authorFirstName).append(authorSurname);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -209,7 +209,7 @@ public class LibraryModel {
     public String showCustomer(int customerID) {
         Statement s = null;
         ResultSet rs = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         boolean customerExists = false;
         try {
             s = connection.createStatement();
@@ -218,15 +218,15 @@ public class LibraryModel {
                 customerExists = true;
                 String customerName = "\n Customer Name: " + rs.getString("F_Name") + rs.getString("L_Name");
                 String city = "\n City: " + rs.getString("city");
-                result += "\n \n Customer ID: " + customerID + customerName + city;
+                result.append("\n \n Customer ID: ").append(customerID).append(customerName).append(city);
             }
             if (!customerExists) {
-                result = "There are no records of this customer in the database;";
+                result = new StringBuilder("There are no records of this customer in the database;");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -237,7 +237,7 @@ public class LibraryModel {
     public String showAllCustomers() {
         Statement s = null;
         ResultSet rs = null;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         try {
             s = connection.createStatement();
             rs = s.executeQuery("SELECT * FROM Customer");
@@ -245,12 +245,12 @@ public class LibraryModel {
                 String customerName = "\n Customer Name: " + rs.getString("F_Name") + rs.getString("L_Name");
                 String city = "\n City: " + rs.getString("city");
                 String customerId = "\n Customer ID: " + rs.getString("customerId");
-                result += "\n \n" + customerId + customerName + city;
+                result.append("\n \n").append(customerId).append(customerName).append(city);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -293,7 +293,7 @@ public class LibraryModel {
                                     + "');");
                             s.executeUpdate("UPDATE book SET numleft = numleft-1 WHERE isbn =" + isbn + " ;");
                             s.execute("commit;");
-                            result = "book borrowed ";
+                            result = "Book has been borrowed ";
                         }
 
                         f.setSize(300, 300);
