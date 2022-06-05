@@ -27,8 +27,8 @@ public class LibraryModel {
         this.dialogParent = parent;
         try {
             Class.forName("org.postgresql.Driver");
-//            URL for running project on uni lab machines
-            String urlUni = "jdbc:postgresql://db.ecs.vuw.ac.nz" + userId + "_jdbc";
+//            URL, username and password for running project on uni lab machines
+            String urlUni = "jdbc:postgresql://db.ecs.vuw.ac.nz/" + userId + "_jdbc";
            String userUni = "romanematt";
            String passwordUni = "romanematt2463";
 
@@ -36,7 +36,7 @@ public class LibraryModel {
             String urlLocal = "jdbc:postgresql://localhost:5432/matt.romanes";
             String userLocal = "matt.romanes";
             String passwordLocal = "romanematt";
-            connection = DriverManager.getConnection(urlLocal, userId, password);
+            connection = DriverManager.getConnection(urlUni, userId, password);
             connection.setAutoCommit(false);
 
             System.out.println("Connection established.");
