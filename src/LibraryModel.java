@@ -27,15 +27,11 @@ public class LibraryModel {
         this.dialogParent = parent;
         try {
             Class.forName("org.postgresql.Driver");
-//            URL, username and password for running project on uni lab machines
+//            URL for running project on uni lab machines
             String urlUni = "jdbc:postgresql://db.ecs.vuw.ac.nz/" + userId + "_jdbc";
-           String userUni = "romanematt";
-           String passwordUni = "romanematt2463";
 
 //            URL for running the project locally, as well as username and password
             String urlLocal = "jdbc:postgresql://localhost:5432/matt.romanes";
-            String userLocal = "matt.romanes";
-            String passwordLocal = "romanematt";
             connection = DriverManager.getConnection(urlUni, userId, password);
             connection.setAutoCommit(false);
 
@@ -59,38 +55,34 @@ public class LibraryModel {
      * @return
      */
     public String bookLookup(int isbn) {
-        String edition = "";
-        String nCopies = "";
-        String copiesLeft = "";
-        String authorSurname = "";
-        String authorFirstName = "";
-        String title = "";
-
-
+        Statement s = null;
+        ResultSet rs = null;
+        String result = "";
+        boolean bookExists = false;
         try {
-            String query = "SELECT * FROM Book NATURAL JOIN Book_Author NATURAL JOIN AUTHOR " +
-                    "WHERE (isbn = " + isbn + ")" +
-                    "ORDER BY AuthorSeqNo ASC;";
-
-            Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery(query);
-
-            //Searching for the result then adding it to the output.
-            while (result.next()) {
-                edition = result.getString("edition_no");
-                nCopies = result.getString("numofcop");
-                copiesLeft = result.getString("numleft");
-                authorFirstName = result.getString("name");
-                authorSurname = result.getString("surname");
-                title = result.getString("Title");
+            s = connection.createStatement();
+            rs = s.executeQuery("SELECT * FROM Book NATURAL JOIN Book_Author NATURAL JOIN AUTHOR  WHERE ISBN=" + isbn
+                    + "ORDER BY AuthorSeqNo ASC");
+            while (rs.next()) {
+                bookExists = true;
+                String title = "\n Title: " + rs.getString("Title");
+                String edition = "\n Edition No.: " + rs.getString("edition_no");
+                String noOfCopies = "\n Number of Copies: " + rs.getString("numofcop");
+                String numLeft = "\n Number left: " + rs.getString("numleft");
+                String Author = "\n Author: " + rs.getString("name");
+                if (result.equals("")) {
+                    result += "\n \n isbn: " + isbn + title + edition + noOfCopies + numLeft + Author;
+                } else {
+                    result += Author;
+                }
             }
-            statement.close();
-
+            if (!bookExists) {
+                result = "There are no records of this book in the database";
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return "Book Lookup: \n     " + isbn + ": " + title + "\n   Edition: " + edition +
-                " \n    Number of copies: " + nCopies + " \n    Copies left: " + copiesLeft + "\n 	Authors: " + authorSurname.replaceAll("\\s+", " ") + ", " + authorFirstName.replaceAll("\\s+", " ");
+        return result;
     }
 
     /**
@@ -100,27 +92,25 @@ public class LibraryModel {
      * @return
      */
     public String showCatalogue() {
-        //        Declaring variables for accessibility throughout method
-        String showCat = "Show catalogue: ";
-        StringBuilder output = new StringBuilder();
-
+        Statement s = null;
+        ResultSet rs = null;
+        String result = "";
         try {
-            String query = "SELECT isbn FROM Book ORDER BY isbn ASC;";
-            Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery(query);
-
-            while (result.next()) {
-                int isbn = result.getInt("isbn");
-
-                //search the book with its isbn using method bookLookup.
-                output.append("\n \n ").append(bookLookup(isbn));
+            s = connection.createStatement();
+            rs = s.executeQuery("SELECT * FROM book ORDER BY isbn ASC");
+            while (rs.next()) {
+                String isbn = "ISBN: " + rs.getString("isbn");
+                String title = "\n Title: " + rs.getString("Title");
+                String edition = "\n Edition No.: " + rs.getString("edition_no");
+                String noOfCopies = "\n Number of Copies: " + rs.getString("numofcop");
+                String numLeft = "\n Number left: " + rs.getString("numleft");
+                result += "\n \n" + isbn + title + edition + noOfCopies + numLeft;
             }
-
         } catch (SQLException e) {
-            return "ERROR accessing catalogue.";
+            e.printStackTrace();
         }
+        return "Show Catalogue: \n" + result;
 
-        return showCat + output.toString();
     }
 
     /**
@@ -129,32 +119,32 @@ public class LibraryModel {
      * @return
      */
     public String showLoanedBooks() {
-        StringBuilder output = new StringBuilder("Show Loaned Books: \n 	");
-
+        Statement s = null;
+        ResultSet rs = null;
+        String result = "";
+        String loanedBooks = "";
+        boolean loaned = false;
         try {
-            int isbn = 0;
-            //if no books are loaned, the boolean will return false
-            boolean isLoaned = false;
-
-            String query = "SELECT * FROM Book WHERE (numofcop > numLeft) ORDER BY isbn ASC;";
-            Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery(query);
-
-            //the book has been succesfully loaned (if any)
-            while (result.next()) {
-                isLoaned = true;
-                isbn = result.getInt("isbn");
-                output.append(bookLookup(isbn)).append("\n \n ");
+            s = connection.createStatement();
+            rs = s.executeQuery("SELECT * FROM book WHERE numofcop > numLeft ORDER BY isbn ASC");
+            while (rs.next()) {
+                loaned = true;
+                loanedBooks = "Loaned books : \n";
+                String isbn = "ISBN: " + rs.getString("isbn");
+                String title = "\n Title: " + rs.getString("Title");
+                String edition = "\n Edition No.: " + rs.getString("edition_no");
+                String noOfCopies = "\n Number of Copies: " + rs.getString("numofcop");
+                String numLeft = "\n Number left: " + rs.getString("numleft");
+                result += "\n \n " + isbn + title + edition + noOfCopies + numLeft;
             }
-            statement.close();
+            if (!loaned) {
+                loanedBooks = "There are currently no loaned books.";
 
-            if (!isLoaned) return output + "(No Loaned Books)";
-
+            }
         } catch (SQLException e) {
-            return "ERROR accessing books.";
+            e.printStackTrace();
         }
-
-        return output.toString();
+        return loanedBooks + result;
     }
 
     /**
@@ -164,46 +154,26 @@ public class LibraryModel {
      * @return
      */
     public String showAuthor(int authorID) {
-        String title = "";
-        String output = "";
-        StringBuilder book = new StringBuilder();
-        int ID = 0;
-
+        Statement s = null;
+        ResultSet rs = null;
+        String result = "";
+        boolean authorExists = false;
         try {
-            String query = "SELECT * FROM Book NATURAL JOIN Book_Author NATURAL JOIN AUTHOR " +
-                    "WHERE (AuthorId = " + authorID + ")" +
-                    "ORDER BY AuthorSeqNo ASC;";
-
-            Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery(query);
-
-            while (result.next()) {
-                //iterates +1 book
-                ID++;
-                output = "	" + authorID + " - " + result.getString("name").
-                        replaceAll("\\s+", "") + " " + result.getString("surname").
-                        replaceAll("\\s+", "") + "\n";
-
-                book.append("\n	").
-                        append(result.getInt("isbn")).
-                        append(" - ").
-                        append(result.getString("title"));
+            s = connection.createStatement();
+            rs = s.executeQuery("SELECT * FROM Author WHERE authorid=" + authorID);
+            while (rs.next()) {
+                authorExists = true;
+                String authorFirstName = "\n Author's first name: " + rs.getString("name");
+                String authorSurname = "\n Author's surname: " + rs.getString("surname");
+                result += "\n \n Author ID: " + authorID + authorFirstName + authorSurname;
             }
-
-            //Book does not exist/have been written.
-            if (ID == 0) {
-                title = "(no books written)";
-            } else {
-                title = "Book written:";
+            if (!authorExists) {
+                result = "There are no records of this author in the database";
             }
-
-            statement.close();
-
         } catch (SQLException e) {
-            return "No such Author ID: ";
+            e.printStackTrace();
         }
-
-        return "Show Author: \n" + output + title + book + " \n";
+        return result;
     }
 
     /**
@@ -212,29 +182,22 @@ public class LibraryModel {
      * @return
      */
     public String showAllAuthors() {
-        StringBuilder allAuthors = new StringBuilder("Showing Authors: \n");
-
+        Statement s = null;
+        ResultSet rs = null;
+        String result = "";
         try {
-            String select = "SELECT * FROM author;";
-            Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery(select);
-
-            while (result.next()) {
-                allAuthors.append(" 	").
-                        append(result.getInt("authorid")).
-                        append(" - ").
-                        append(result.getString("name").
-                                replaceAll("\\s+", "")).
-                        append(", ").
-                        append(result.getString("surname")).
-                        append("\n");
+            s = connection.createStatement();
+            rs = s.executeQuery("SELECT * FROM Author");
+            while (rs.next()) {
+                String authorFirstName = "\n Author first name: " + rs.getString("name");
+                String authorSurname = "\n Author surname: " + rs.getString("surname");
+                String authorId = "\n Author ID: " + rs.getString("authorid");
+                result += authorId + authorFirstName + authorSurname;
             }
-
         } catch (SQLException e) {
-            System.out.println("ERROR Showing Authors");
+            e.printStackTrace();
         }
-
-        return allAuthors.toString();
+        return "Showing all authors: \n" + result;
     }
 
     /**
@@ -244,60 +207,26 @@ public class LibraryModel {
      * @return
      */
     public String showCustomer(int customerID) {
-        StringBuilder cust = new StringBuilder("Show Customer: \n");
-        StringBuilder book = new StringBuilder();
-        String borrowed = "";
-
+        Statement s = null;
+        ResultSet rs = null;
+        String result = "";
+        boolean customerExists = false;
         try {
-            int customer = 0;
-            Statement statement = connection.createStatement();
-            String select = "SELECT * FROM  Customer WHERE (customerId = " + customerID + ");";
-            ResultSet result = statement.executeQuery(select);
-
-            while (result.next()) {
-                customer++;
+            s = connection.createStatement();
+            rs = s.executeQuery("SELECT * FROM Customer WHERE customerid=" + customerID);
+            while (rs.next()) {
+                customerExists = true;
+                String customerName = "\n Customer Name: " + rs.getString("F_Name") + rs.getString("L_Name");
+                String city = "\n City: " + rs.getString("city");
+                result += "\n \n Customer ID: " + customerID + customerName + city;
             }
-            if (customer == 0) {
-                return "No customer with that ID in the database.";
-            }
-
-            try {
-                select = "SELECT * FROM Customer WHERE (customerId = " + customerID + ");";
-                result = statement.executeQuery(select);
-
-                while (result.next()) {
-                    cust.append(" 	").append(result.getInt("customerid")).append(": ").append(result.getString("l_name").replaceAll("\\s+", "")).append(", ").append(result.getString("f_name").replaceAll("\\s+ ", "")).append(" - ").append(result.getString("city")).append("\n");
-                }
-
-                select = "SELECT * FROM Cust_book NATURAL JOIN book WHERE (customerId = " + customerID + ");";
-                result = statement.executeQuery(select);
-
-                while (result.next()) {
-                    book.append(" 	\n ").
-                            append(result.getInt("isbn")).
-                            append(" - ").
-                            append(result.getString("title"));
-                    customer++;
-                }
-
-                if (customer == 0) {
-                    borrowed = "\n (No books borrowed)";
-                } else {
-                    borrowed = " 	Books Borrowed: " + customer;
-                }
-
-                statement.close();
-
-            } catch (SQLException e) {
-                System.out.println("ERROR cannot find books");
-                e.printStackTrace();
+            if (!customerExists) {
+                result = "There are no records of this customer in the database;";
             }
         } catch (SQLException e) {
-            System.out.println("ERROR cannot find books");
             e.printStackTrace();
         }
-
-        return cust + borrowed + book + " \n";
+        return result;
     }
 
     /**
@@ -306,32 +235,22 @@ public class LibraryModel {
      * @return
      */
     public String showAllCustomers() {
-        StringBuilder allCustomers = new StringBuilder("Show all customers: \n");
-
+        Statement s = null;
+        ResultSet rs = null;
+        String result = "";
         try {
-            String select = "SELECT * FROM customer;";
-            Statement statement = connection.createStatement();
-            ResultSet result = statement.executeQuery(select);
-
-            while (result.next()) {
-                allCustomers.append(result.getInt("customerid")).
-                        append(": ").
-                        append(result.getString("l_name").
-                                replaceAll("\\s+", "")).
-                        append(", ").
-                        append(result.getString("f_name").
-                                replaceAll("\\s+ ", ""))
-                        .append(" - ").
-                        append(result.getString("city")).
-                        append(" \n");
+            s = connection.createStatement();
+            rs = s.executeQuery("SELECT * FROM Customer");
+            while (rs.next()) {
+                String customerName = "\n Customer Name: " + rs.getString("F_Name") + rs.getString("L_Name");
+                String city = "\n City: " + rs.getString("city");
+                String customerId = "\n Customer ID: " + rs.getString("customerId");
+                result += "\n \n" + customerId + customerName + city;
             }
-
         } catch (SQLException e) {
-            System.out.println("ERROR getting all customers");
             e.printStackTrace();
         }
-
-        return allCustomers.toString();
+        return result;
     }
 
     /**
@@ -346,79 +265,55 @@ public class LibraryModel {
      */
     public String borrowBook(int isbn, int customerID,
                              int day, int month, int year) {
-        String borrow = "Borrow Book: \n";
-        String message = "Customer is unable to borrow book.";
-        StringBuilder finalResult = new StringBuilder();
-
+        Statement s = null;
+        String result = "";
         try {
-            Statement statementOne = connection.createStatement();
-            Statement statementTwo = connection.createStatement();
-            Statement statementThree = connection.createStatement();
+            s = connection.createStatement();
+            // check if customer exist
+            ResultSet rsCustomer = s.executeQuery("SELECT * FROM Customer WHERE customerid=" + customerID);
+            s = connection.createStatement();
+            // check if customer exist
 
-            String selectOne = "SELECT numLeft FROM book WHERE (isbn = " + isbn + ") AND (numLeft > 0);";
-            ResultSet resultOne = statementOne.executeQuery(selectOne);
+            if (rsCustomer.next()) {
+                s = connection.createStatement();
+                s.execute("BEGIN");
+                s.execute("LOCK Customer IN ROW SHARE MODE;");
+                ResultSet rsbook = s.executeQuery("SELECT * FROM book WHERE isbn=" + isbn);
+                if (rsbook.next()) {
+                    String bookleft = rsbook.getString("numLeft");
+                    if (Integer.parseInt(bookleft) > 0) {
+                        s.execute("LOCK book IN ROW SHARE MODE;");
 
-            if (resultOne.next()) {
-                String selectTwo = "SELECT customerid FROM cust_book WHERE (isbn = " + isbn + ") AND (customerid = " + customerID + ");";
-                ResultSet resultTwo = statementTwo.executeQuery(selectTwo);
+                        JFrame f = new JFrame();
+                        int a = JOptionPane.showConfirmDialog(f, "Are you sure that you want to borrow this book?");
+                        if (a == JOptionPane.YES_OPTION) {
+                            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                            LocalDate date = LocalDate.of(year, month, day);
+                            s.executeUpdate("INSERT INTO cust_book VALUES('" + isbn + "','" + date + "','" + customerID
+                                    + "');");
+                            s.executeUpdate("UPDATE book SET numleft = numleft-1 WHERE isbn =" + isbn + " ;");
+                            s.execute("commit;");
+                            result = "book borrowed ";
+                        }
 
-                //checks if the result from the query of the isbn entered
-                if (resultTwo.next())
-                    message = "Customer already borrowed this book: " + isbn;
-                else {
-                    message = "Borrow book successful.";
-                    updateBook(isbn, customerID, day, month, year);
+                        f.setSize(300, 300);
+                        f.setLayout(null);
+                    }
+                } else {
+                    result = "There are no books left.";
                 }
-            } else message = "There are no copies left of this book: " + isbn;
-
-            String selectThree = "SELECT customerid FROM cust_book WHERE (isbn = " + isbn + ") AND (customerid = " + customerID + ");";
-            ResultSet resultThree = statementThree.executeQuery(selectThree);
-            resultThree = statementThree.executeQuery("SELECT * FROM cust_book WHERE (customerid = " + customerID + ");");
-
-            while (resultThree.next()) {
-                finalResult.append("\n ").append(resultThree.getInt("isbn")).
-                        append(" - ").append(resultThree.getString("title")).
-                        append("\nLoaned to: ").append(resultThree.getInt("customerid")).
-                        append(": ").
-                        append(resultThree.getString("l_name").
-                                replaceAll("\\s+", "")).
-                        append(", ").
-                        append(resultThree.getString("f_name").
-                                replaceAll("\\s+ ", "")).
-                        append("\nDue Date: ").append(resultThree.
-                                getDate(2));
+            } else {
+                result = "There are no records of this customer in the database";
             }
-        } catch (SQLException e) {
-            System.out.println("ERROR borrowing book");
-            e.printStackTrace();
         }
 
-        return borrow + message + "\n 	Book: " + isbn + finalResult;
-    }
-
-    /**
-     * Helper method for the updateBook method.
-     * Updates the values from the queries and returns it.
-     *
-     * @param isbn, customerID, day, month, year
-     */
-    public void updateBook(int isbn, int customerID, int day, int month, int year) {
-        try {
-            LocalDate dueDate = LocalDate.of(year, month, day);
-
-            Statement statementOne = connection.createStatement();
-            Statement statementTwo = connection.createStatement();
-            String selectOne = "INSERT INTO cust_book VALUES('" + isbn + "','" + dueDate + "','" + customerID + "');";
-            String selectTwo = "UPDATE book SET numleft = numleft-1 WHERE (isbn = " + isbn + ");";
-
-            int resultOne = statementOne.executeUpdate(selectOne);
-            int resultTwo = statementTwo.executeUpdate(selectTwo);
-
-            System.out.println("Book updated.");
-
-        } catch (SQLException e) {
+        catch (SQLException e) {
             e.printStackTrace();
         }
+        return result;
+
+
+
     }
 
     /**
@@ -429,40 +324,50 @@ public class LibraryModel {
      * @return
      */
     public String returnBook(int isbn, int customerid) {
-        String returnBook = "Return Book: \n";
-        String output = "";
-        ResultSet result = null;
-
+        Statement s = null;
+        String result = "";
         try {
-            Statement statement = connection.createStatement();
-            String selectOne = "SELECT * FROM customer WHERE (customerid = " + customerid + ");";
-            result = statement.executeQuery(selectOne);
+            s = connection.createStatement();
+            // check if customer exist
+            ResultSet rsCustomer = s.executeQuery("SELECT * FROM Customer WHERE customerid=" + customerid);
+            s = connection.createStatement();
+            // check if customer exist
 
-            if (result.next()) {
-                if (result.next()) output = "ISBN does not exist.";
+            if (rsCustomer.next()) {
+                s = connection.createStatement();
+                s.execute("BEGIN");
+                s.execute("LOCK Customer IN ROW SHARE MODE;");
+                ResultSet rsBook = s.executeQuery("SELECT * FROM book WHERE isbn=" + isbn);
+                if (rsBook.next()) {
+                    String bookLeft = rsBook.getString("numLeft");
+                    if (Integer.parseInt(bookLeft) > 0) {
+                        s.execute("LOCK book IN ROW SHARE MODE;");
 
-                else {
-                    String selectTwo = "SELECT * FROM book WHERE (isbn = " + isbn + ");";
-                    result = statement.executeQuery(selectTwo);
+                        JFrame f = new JFrame();
+                        int a = JOptionPane.showConfirmDialog(f, "Are you sure that you want to return this book?");
+                        if (a == JOptionPane.YES_OPTION) {
+                            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                            s.executeUpdate("DELETE FROM cust_book WHERE customerid =" + customerid + ";");
+                            s.executeUpdate("UPDATE book SET numleft = numleft+1 WHERE isbn =" + isbn + " ;");
+                            s.execute("commit;");
+                            result = "book returned. ";
+                        }
 
-                    String selectThree = "DELETE FROM cust_book WHERE (customerid = " + customerid + ");";
-                    statement.executeUpdate(selectThree);
-
-                    String selectFour = "UPDATE book SET numleft = numleft+1 WHERE (isbn = " + isbn + ");";
-                    statement.executeUpdate(selectFour);
+                        f.setSize(300, 300);
+                        f.setLayout(null);
+                    }
+                } else {
+                    result = "There are no books left.";
                 }
-            } else output = "No more remaining copies of the book.";
-
-            String selectFive = "SELECT * FROM cust_book WHERE (customerid = " + customerid + ");";
-            result = statement.executeQuery(selectFive);
-
-            connection.commit();
-        } catch (SQLException e) {
-            System.out.println("ERROR occured");
-            e.printStackTrace();
+            } else {
+                result = "There are no records of this customer in the database.";
+            }
         }
 
-        return returnBook + output + " \n" + " 	Book has been returned.";
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     /**
@@ -477,55 +382,91 @@ public class LibraryModel {
     }
 
     public String deleteCus(int customerID) {
-        String deleteCustomer = "Delete Customer: \n \n";
-        String message = "";
-
+        Statement s = null;
+        String result = "";
         try {
-            Statement statement = connection.createStatement();
-            String selectOne = "SELECT * FROM cust_book WHERE (customerid = " + customerID + ");";
-            ResultSet result = statement.executeQuery(selectOne);
+            s = connection.createStatement();
+            // check if customer exist
+            ResultSet rsCustomer = s.executeQuery("SELECT * FROM Customer WHERE customerid=" + customerID);
+            if (rsCustomer.next()) {
+                ResultSet rsCustCustomer = s.executeQuery("SELECT * FROM cust_book WHERE customerid=" + customerID);
+                if (rsCustCustomer.next()) {
+                    s = connection.createStatement();
+                    s.execute("BEGIN");
+                    result = "The customer with customer ID(" + customerID
+                            + ") still has loaned books. \n Therefore, their records cannot be deleted";
+                } else {
+                    s.executeUpdate("DELETE FROM customer WHERE customerid = " + customerID);
+                    s.execute("commit;");
+                    result = "Customer deleted.";
+                }
 
-            if (!result.next()) {
-                message = " The Customer does not exist within this library.";
             } else {
-                Statement statementTwo = connection.createStatement();
-                String selectTwo = "DELETE  FROM customer WHERE (customerid = " + customerID + ");";
-                int resultTwo = statementTwo.executeUpdate(selectTwo);
-
-                message = "The Customer has been removed from the database.";
+                result = "There are no records of this customer in the database";
             }
-        } catch (SQLException e) {
+        }
+
+        catch (SQLException e) {
             e.printStackTrace();
         }
-        return deleteCustomer + message;
+        return result;
     }
 
     public String deleteAuthor(int authorID) {
-        String deleteAuthor = "Delete Author: \n \n";
-        String message = "";
-
+        Statement s = null;
+        String result = "";
         try {
-            Statement statementOne = connection.createStatement();
-            String selectOne = "SELECT * FROM author WHERE (authorid = " + authorID + ");";
-            ResultSet resultOne = statementOne.executeQuery(selectOne);
+            s = connection.createStatement();
+            // check if customer exist
+            ResultSet rsAuthor = s.executeQuery("SELECT * FROM Author WHERE authorid=" + authorID);
+            if (rsAuthor.next()) {
+                s.executeUpdate("DELETE FROM Book_Author WHERE authorid = " + authorID);
+                s.executeUpdate("DELETE FROM Author WHERE authorid = " + authorID);
+                s.execute("commit;");
+                result = "Author deleted.";
 
-            if (!resultOne.next()) {
-                message = "The Author does not exist within this library.";
             } else {
-                Statement statementTwo = connection.createStatement();
-                String selectTwo = "DELETE FROM author WHERE (authorid = " + authorID + ");";
-                int resultTwo = statementTwo.executeUpdate(selectTwo);
-
-                message = "The Author has been removed from the database.";
+                result = "There are no records of this author in the database.";
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
-        return deleteAuthor + message;
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public String deleteBook(int isbn) {
-        return "Delete Book: \n \n";
+        Statement s = null;
+        String result = "";
+        try {
+            s = connection.createStatement();
+            // check if customer exist
+            ResultSet rsBook = s.executeQuery("SELECT * FROM book WHERE isbn=" + isbn);
+            if (rsBook.next()) {
+                ResultSet rsCustBook = s.executeQuery("SELECT * FROM cust_book WHERE isbn=" + isbn);
+                if (rsCustBook.next()) {
+                    s = connection.createStatement();
+                    s.execute("BEGIN");
+                    result = "The book with ISBN(" + isbn
+                            + ") still has loaned copies. \n Therefore, it cannot be deleted.";
+                } else {
+                    ResultSet rsauBook = s.executeQuery("SELECT * FROM Book_Author WHERE isbn=" + isbn);
+                    s.executeUpdate("DELETE FROM Book_Author WHERE isbn = " + isbn);
+                    s.executeUpdate("DELETE FROM book WHERE isbn = " + isbn);
+
+                    s.execute("commit;");
+                    result = "Book deleted.";
+                }
+
+            } else {
+                result = "There are no records of this book in the database";
+            }
+        }
+
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }
